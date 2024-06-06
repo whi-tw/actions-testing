@@ -90,5 +90,5 @@ jobs:
     steps:
       - name: Dump PR data
         env:
-          PR_DATA: ${{ toJson(needs.pr-data.outputs.data) }}
+          PR_DATA: ${{ toJson(fromJson(needs.pr-data.outputs.data)) }}
         run: echo "$PR_DATA"

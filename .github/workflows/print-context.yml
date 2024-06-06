@@ -1,6 +1,7 @@
 name: Print context [PUSH]
 on:
   push:
+  workflow_dispatch:
 
 jobs:
   print-context:

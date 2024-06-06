@@ -20,9 +20,7 @@ jobs:
       pr_api_url: ${{ steps.data.outputs.pr_api_url }}
       pr_html_url: ${{ steps.data.outputs.pr_html_url }}
 
-      commit_author: ${{ steps.data.outputs.commit_author }}
       commit_api_url: ${{ steps.data.outputs.commit_api_url }}
-      commit_html_url: ${{ steps.data.outputs.commit_html_url }}
 
       repo_full_name: ${{ steps.data.outputs.repo_full_name }}
       repo_owner: ${{ steps.data.outputs.repo_owner }}
@@ -71,9 +69,7 @@ jobs:
           } >> $GITHUB_OUTPUT
           echo 'Exporting commit data to $GITHUB_OUTPUT'
           {
-            echo 'commit_author=${{ fromJson(steps.get_commit_data.outputs.result).author.login }}'
             echo 'commit_api_url=${{ fromJson(steps.get_commit_data.outputs.result).url }}'
-            echo 'commit_html_url=${{ fromJson(steps.get_commit_data.outputs.result).html_url }}'
           } >> $GITHUB_OUTPUT
           echo 'Exporting repo data to $GITHUB_OUTPUT'
           {

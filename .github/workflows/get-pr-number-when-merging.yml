@@ -58,7 +58,7 @@ jobs:
       - name: Output data
         id: data
         run: |
-          echo 'Exporting PR data to $GITHUB_OUTPUT'
+          echo "Exporting PR data to \$GITHUB_OUTPUT"
           {
             echo 'pr_number=${{ fromJson(steps.get_pr_data.outputs.result).number }}'
             echo 'pr_title=${{ fromJson(steps.get_pr_data.outputs.result).title }}'
@@ -66,19 +66,21 @@ jobs:
             echo 'pr_merge_commit_sha=${{ fromJson(steps.get_pr_data.outputs.result).merge_commit_sha }}'
             echo 'pr_api_url=${{ fromJson(steps.get_pr_data.outputs.result).url }}'
             echo 'pr_html_url=${{ fromJson(steps.get_pr_data.outputs.result).html_url }}'
-          } >> $GITHUB_OUTPUT
-          echo 'Exporting commit data to $GITHUB_OUTPUT'
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Exporting commit data to \$GITHUB_OUTPUT"
           {
             echo 'commit_api_url=${{ fromJson(steps.get_commit_data.outputs.result).url }}'
-          } >> $GITHUB_OUTPUT
-          echo 'Exporting repo data to $GITHUB_OUTPUT'
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Exporting repo data to \$GITHUB_OUTPUT"
           {
             echo 'repo_full_name=${{ github.repository }}'
             echo 'repo_owner=${{ github.repository_owner }}'
             echo 'repo_name=${{ github.event.repository.name }}'
             echo 'repo_api_url=${{ github.event.repository.url }}'
             echo 'repo_html_url=${{ github.event.repository.html_url }}'
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
   print-data:
     name: Print PR data

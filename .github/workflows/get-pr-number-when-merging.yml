@@ -6,14 +6,32 @@ on:
       - main
 
 jobs:
-  get-pr-number:
+  pr-data:
+    name: Get data for merged PR
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
+    outputs:
+      pr_number: ${{ steps.data.outputs.pr_number }}
+      pr_title: ${{ steps.data.outputs.pr_title }}
+      pr_merged_at: ${{ steps.data.outputs.pr_merged_at }}
+      pr_merge_commit_sha: ${{ steps.data.outputs.pr_merge_commit_sha }}
+      pr_api_url: ${{ steps.data.outputs.pr_api_url }}
+      pr_html_url: ${{ steps.data.outputs.pr_html_url }}
+
+      commit_author: ${{ steps.data.outputs.commit_author }}
+      commit_api_url: ${{ steps.data.outputs.commit_api_url }}
+      commit_html_url: ${{ steps.data.outputs.commit_html_url }}
+
+      repo_full_name: ${{ steps.data.outputs.repo_full_name }}
+      repo_owner: ${{ steps.data.outputs.repo_owner }}
+      repo_name: ${{ steps.data.outputs.repo_name }}
+      repo_api_url: ${{ steps.data.outputs.repo_api_url }}
+      repo_html_url: ${{ steps.data.outputs.repo_html_url }}
     steps:
       - name: Get PR data
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         id: get_pr_data
         with:
           script: |
@@ -24,7 +42,54 @@ jobs:
                   repo: context.repo.repo,
                 })
               ).data[0];
-      - name: Pull Request data
+      - name: Exit with sensible message if no PR found
+        if: ${{ failure() && steps.get_pr_data.conclusion == 'failure' }}
+        run:
+          echo "::error title=No PR found!::No PR found for commit ${{ github.sha }}. All commits to main must be associated with a PR."
+          exit 1
+      - name: Get commit data
+        uses: actions/github-script@v7
+        id: get_commit_data
+        with:
+          script: |
+            return await github.rest.git.getCommit({
+              commit_sha: context.sha
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+      - name: Output data
+        id: data
         run: |
-          echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
-          echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
+          echo 'Exporting PR data to $GITHUB_OUTPUT'
+          {
+            echo 'pr_number=${{ fromJson(steps.get_pr_data.outputs.result).number }}'
+            echo 'pr_title=${{ fromJson(steps.get_pr_data.outputs.result).title }}'
+            echo 'pr_merged_at=${{ fromJson(steps.get_pr_data.outputs.result).merged_at }}'
+            echo 'pr_merge_commit_sha=${{ fromJson(steps.get_pr_data.outputs.result).merge_commit_sha }}'
+            echo 'pr_api_url=${{ fromJson(steps.get_pr_data.outputs.result).url }}'
+            echo 'pr_html_url=${{ fromJson(steps.get_pr_data.outputs.result).html_url }}'
+          } >> $GITHUB_OUTPUT
+          echo 'Exporting commit data to $GITHUB_OUTPUT'
+          {
+            echo 'commit_author=${{ fromJson(steps.get_commit_data.outputs.result).author.login }}'
+            echo 'commit_api_url=${{ fromJson(steps.get_commit_data.outputs.result).url }}'
+            echo 'commit_html_url=${{ fromJson(steps.get_commit_data.outputs.result).html_url }}'
+          } >> $GITHUB_OUTPUT
+          echo 'Exporting repo data to $GITHUB_OUTPUT'
+          {
+            echo 'repo_full_name=${{ github.repository }}'
+            echo 'repo_owner=${{ github.repository_owner }}'
+            echo 'repo_name=${{ github.event.repository.name }}'
+            echo 'repo_api_url=${{ github.event.repository.url }}'
+            echo 'repo_html_url=${{ github.event.repository.html_url }}'
+          } >> $GITHUB_OUTPUT
+
+  print-data:
+    name: Print PR data
+    runs-on: ubuntu-latest
+    needs: pr-data
+    steps:
+      - name: Dump PR data
+        env:
+          PR_DATA: ${{ toJson(needs.pr-data.outputs) }}
+        run: echo "$PR_DATA"

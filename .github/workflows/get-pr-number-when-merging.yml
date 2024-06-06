@@ -89,6 +89,4 @@ jobs:
     needs: pr-data
     steps:
       - name: Dump PR data
-        env:
-          PR_DATA: ${{ toJson(fromJson(needs.pr-data.outputs.data)) }}
-        run: echo "$PR_DATA"
+        run: echo '${{ needs.pr-data.outputs.data }}'

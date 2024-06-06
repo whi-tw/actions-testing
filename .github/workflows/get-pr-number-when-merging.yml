@@ -53,10 +53,10 @@ jobs:
         with:
           script: |
             return await github.rest.repos.getCommit({
-              commit_sha: context.sha
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: context.sha
+              });
       - name: Output data
         id: data
         run: |

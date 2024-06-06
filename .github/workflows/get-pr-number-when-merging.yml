@@ -52,7 +52,7 @@ jobs:
         id: get_commit_data
         with:
           script: |
-            return await github.rest.git.getCommit({
+            return await github.rest.repos.getCommit({
               commit_sha: context.sha
               owner: context.repo.owner,
               repo: context.repo.repo,
